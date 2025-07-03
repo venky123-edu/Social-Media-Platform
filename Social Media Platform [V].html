@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socius - Social Media Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --accent: #4895ef;
+            --light: #f8f9fa;
+            --dark: #212529;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: var(--dark);
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        }
+        
+        .post-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .post-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .story-item {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4361ee 0%, #4895ef 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .story-item:hover {
+            transform: scale(1.05);
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 20px;
+            height: 20px;
+            background-color: #ef233c;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: white;
+        }
+        
+        .tab-active {
+            border-bottom: 2px solid var(--primary);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease forwards;
+        }
+        
+        .comment-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="hidden md:flex md:flex-col md:w-64 bg-white border-r border-gray-200">
+            <div class="flex items-center justify-center p-4 border-b border-gray-200">
+                <h1 class="text-2xl font-bold gradient-text bg-gradient-to-r from-blue-600 to-indigo-800 bg-clip-text text-transparent">Socius</h1>
+            </div>
+            <nav class="flex-1 px-2 py-4">
+                <a href="#" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100">
+                    <i class="fas fa-home mr-3 text-blue-600"></i>
+                    <span>Home</span>
+                </a>
+                <a href="#" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100">
+                    <i class="fas fa-search mr-3 text-blue-600"></i>
+                    <span>Explore</span>
+                </a>
+                <a href="#" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100">
+                    <i class="fas fa-bell mr-3 text-blue-600"></i>
+                    <span>Notifications</span>
+                    <span class="notification-badge">3</span>
+                </a>
+                <a href="#" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100">
+                    <i class="fas fa-envelope mr-3 text-blue-600"></i>
+                    <span>Messages</span>
+                </a>
+                <a href="#" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100">
+                    <i class="fas fa-bookmark mr-3 text-blue-600"></i>
+                    <span>Bookmarks</span>
+                </a>
+                <a href="#" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100">
+                    <i class="fas fa-user mr-3 text-blue-600"></i>
+                    <span>Profile</span>
+                </a>
+                <a href="#" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100">
+                    <i class="fas fa-cog mr-3 text-blue-600"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+            <div class="p-4 border-t border-gray-200">
+                <button class="w-full gradient-bg text-white py-2 rounded-lg font-medium shadow-md hover:shadow-lg transition">
+                    Create Post
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Mobile Header -->
+            <header class="md:hidden flex items-center justify-between p-4 bg-white border-b border-gray-200">
+                <h1 class="text-xl font-bold gradient-text bg-gradient-to-r from-blue-600 to-indigo-800 bg-clip-text text-transparent">Socius</h1>
+                <div class="flex items-center space-x-4">
+                    <button class="relative">
+                        <i class="fas fa-bell text-gray-600"></i>
+                        <span class="notification-badge">3</span>
+                    </button>
+                    <button>
+                        <i class="fas fa-search text-gray-600"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Feed Content -->
+            <main class="flex-1 overflow-y-auto">
+                <!-- Stories -->
+                <div class="bg-white p-4 border-b border-gray-200">
+                    <div class="flex items-center space-x-4 overflow-x-auto pb-2 scrollbar-hide">
+                        <div class="story-item" onclick="openStoryModal()">
+                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/4ef9f4b2-79c2-45d0-ae0a-38c0eb22edb6.png" alt="Profile picture of current user smiling with cityscape in background" class="w-[76px] h-[76px] rounded-full border-2 border-white object-cover" />
+                            <div class="absolute bottom-0 right-0 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs">
+                                <i class="fas fa-plus"></i>
+                            </div>
+                        </div>
+                        <div class="story-item" onclick="openStoryViewer(1)">
+                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/8eb04085-992a-4a54-b307-22a887277fbc.png" alt="Young woman with curly hair laughing in a park" class="w-[76px] h-[76px] rounded-full border-2 border-white object-cover" />
+                        </div>
+                        <div class="story-item" onclick="openStoryViewer(2)">
+                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/565cfc2a-d7d2-41f8-a9b4-19b44be4d007.png" alt="Business man in formal wear standing in an office" class="w-[76px] h-[76px] rounded-full border-2 border-white object-cover" />
+                        </div>
+                        <div class="story-item" onclick="openStoryViewer(3)">
+                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/26413c21-84e1-4b9c-b3a3-7ea5fc7b1829.png" alt="Couple hiking on mountain trail with scenic view" class="w-[76px] h-[76px] rounded-full border-2 border-white object-cover" />
+                        </div>
+                        <div class="story-item" onclick="openStoryViewer(4)">
+                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/ec6e3b56-9460-49bb-83ae-08d714207046.png" alt="Artist painting on canvas in a sunlit studio" class="w-[76px] h-[76px] rounded-full border-2 border-white object-cover" />
+                        </div>
+                        <div class="story-item" onclick="openStoryViewer(5)">
+                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/284d296e-c78c-44e1-902e-d0affcef3d0e.png" alt="Chef preparing food in a professional kitchen" class="w-[76px] h-[76px] rounded-full border-2 border-white object-cover" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Create Post -->
+                <div class="bg-white p-4 border-b border-gray-200 mb-4 animate-fade-in">
+                    <div class="flex items-center mb-3">
+                        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/9bcff491-ffef-4e21-904b-8ad9df5a4177.png" alt="Current user's profile picture showing smiling face" class="w-10 h-10 rounded-full mr-3" />
+                        <input type="text" placeholder="What's on your mind?" class="flex-1 bg-gray-100 rounded-full py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500" onclick="openCreatePostModal()">
+                    </div>
+                    <div class="flex justify-between text-gray-500 text-sm">
+                        <button class="flex items-center px-3 py-2 rounded-lg hover:bg-gray-100" onclick="openCreatePostModal('photo')">
+                            <i class="fas fa-image text-blue-500 mr-2"></i>
+                            Photo/Video
+                        </button>
+                        <button class="flex items-center px-3 py-2 rounded-lg hover:bg-gray-100" onclick="openCreatePostModal('tag')">
+                            <i class="fas fa-user-tag text-green-500 mr-2"></i>
+                            Tag Friends
+                        </button>
+                        <button class="flex items-center px-3 py-2 rounded-lg hover:bg-gray-100" onclick="openCreatePostModal('feeling')">
+                            <i class="fas fa-smile text-yellow-500 mr-2"></i>
+                            Feeling
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Posts -->
+                <div class="mb-4 animate-fade-in">
+                    <!-- Post 1 -->
+                    <div class="bg-white rounded-lg shadow post-card mb-4">
+                        <!-- Post Header -->
+                        <div class="flex items-center p-4">
+                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/e369bbe4-39d2-4975-826f-9e253240649a.png" alt="Profile picture of user Sarah Johnson with red hair" class="w-10 h-10 rounded-full mr-3" />
+                            <div>
+                                <h3 class="font-semibold">Sarah Johnson</h3>
+                                <p class="text-gray-500 text-xs">2 hours ago · <i class="fas fa-globe-americas"></i></p>
+                            </div>
+                            <div class="ml-auto relative">
+                                <button class="text-gray-400 hover:text-gray-600" onclick="togglePostOptionsMenu(this)">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </button>
+                                <div class="post-options-menu hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
+                                    <div class="py-1">
+                                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Save Post</a>
+                                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Report Post</a>
+                                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Turn on notifications</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Post Content -->
+                        <div class="px-4 pb-2">
+                            <p class="mb-3">Just completed my first marathon! 🏃‍♀️ The training was tough but totally worth it. Special thanks to everyone who supported me along the way! #Marathon #Achievement</p>
+                            <div class="mb-3">
+                                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/ced29745-7d2c-424f-ab76-ad52362b6d65.png" alt="Sarah Johnson crossing finish line at marathon with arms raised in victory" class="w-full h-auto rounded-lg" />
+                            </div>
+                            <div class="flex flex-wrap gap-1 mb-3">
+                                <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">#Marathon</span>
+                                <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">#Achievement</span>
+                                <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">#Fitness</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Post Stats -->
+                        <div class="px-4 py-2 border-t border-gray-100 text-sm text-gray-500 flex items-center">
+                            <div class="flex items-center mr-4">
+                                <div class="flex -space-x-1">
+                                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/76fff0b4-2ce1-4a6b-a9df-eebcd7ea6fdf.png" alt="Small profile picture of user Mike Chen" class="w-5 h-5 rounded-full border-2 border-white" />
+                                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/3706c45b-e2e8-4dab-8b35-32e367f1792c.png" alt="Small profile picture of user Emily Rodriguez" class="w-5 h-5 rounded-full border-2 border-white" />
+                                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/b96928ec-c5b9-4d79-bd3f-e39593a5f461.png" alt="Small profile picture of user David Kim" class="w-5 h-5 rounded-full border-2 border-white" />
+                                </div>
+                                <span class="ml-2">42</span>
+                            </div>
+                            <div class="mr-4">
+                                <span>12 comments</span>
+                            </div>
+                            <div>
+                                <span>3 shares</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Post Actions -->
+                        <div class="px-4 py-2 border-t border-gray-100 text-sm text-gray-500 flex justify-between">
+                            <button class="flex-1 flex items-center justify-center py-2 rounded hover:bg-gray-100" onclick="likePost(this)">
+                                <i class="far fa-thumbs-up mr-2"></i>
+                                <span>Like</span>
+                            </button>
+                            <button class="flex-1 flex items-center justify-center py-2 rounded hover:bg-gray-100" onclick="focusCommentBox(this)">
+                                <i class="far fa-comment mr-2"></i>
+                                <span>Comment</span>
+                            </button>
+                            <button class="flex-1 flex items-center justify-center py-2 rounded hover:bg-gray-100">
+                                <i class="fas fa-share mr-2"></i>
+                                <span>Share</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Comments -->
+                        <div class="px-4 py-2 border-t border-gray-100">
+                            <div class="flex mb-2">
+                                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/7cb22d52-dcf8-4527-a9a2-9c6f657b36de.png" alt="Profile picture of commenter Mike Chen" class="w-8 h-8 rounded-full mr-2" />
+                                <div>
+                                    <div class="bg-gray-100 rounded-lg p-2">
+                                        <p class="font-semibold text-sm">Mike Chen</p>
+                                        <p class="text-sm">Amazing achievement Sarah! Proud of you!</p>
+                                    </div>
+                                    <div class="flex text-xs text-gray-500 mt-1">
+                                        <button class="mr-2 hover:text-gray-700">Like</button>
+                                        <button class="hover:text-gray-700">Reply</button>
+                                        <span class="ml-2">2h</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex mb-2">
+                                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/97596964-231b-4682-bf2d-5b0f27c3aec0.png" alt="Profile picture of commenter Emily Rodriguez" class="w-8 h-8 rounded-full mr-2" />
+                                <div>
+                                    <div class="bg-gray-100 rounded-lg p-2">
+                                        <p class="font-semibold text-sm">Emily Rodriguez</p>
+                                        <p class="text-sm">You inspire me to start running! Any tips for beginners?</p>
+                                    </div>
+                                    <div class="flex text-xs text-gray-500 mt-1">
+                                        <button class="mr-2 hover:text-gray-700">Like</button>
+                                        <button class="hover:text-gray-700">Reply</button>
+                                        <span class="ml-2">1h</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/7f082920-a8f3-4778-8d70-46032d57f939.png" alt="Current user's small profile picture" class="w-8 h-8 rounded-full mr-2" />
+                                <input type="text" placeholder="Write a comment..." class="flex-1 bg-gray-100 rounded-full py-2 px-4 text-sm focus:outline-none comment-input" onkeypress="handleCommentKeyPress(event, this)">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Post 2 -->
+                    <div class="bg-white rounded-lg shadow post-card mb-4">
+                        <!-- Post Header -->
+                        <div class="flex items-center p-4">
+                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/95eb9c7d-338c-4862-9913-e955b077f8bc.png" alt="Profile picture of user Tech Trends" class="w-10 h-10 rounded-full mr-3" />
+                            <div>
+                                <h3 class="font-semibold">Tech Trends</h3>
+                                <p class="text-gray-500 text-xs">Sponsored · <i class="fas fa-globe-americas"></i></p>
+                            </div>
+                            <div class="ml-auto">
+                                <button class="text-gray-400 hover:text-gray-600">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Post Content -->
+                        <div class="px-4 pb-2">
+                            <p class="mb-3">The future of AI is here! Check out how machine learning is transforming industries across the globe.</p>
+                            <div class="mb-3">
+                                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/de57eb74-d90f-416a-9008-ddb5abcc9cf3.png" alt="Futuristic technology interface with glowing blue neural network visualization" class="w-full h-auto rounded-lg" />
+                            </div>
+                            <div class="mb-3 p-3 bg-gray-100 rounded-lg">
+                                <h4 class="font-semibold">techtrends.io/ai-revolution</h4>
+                                <p class="text-sm text-gray-500">Discover how AI is reshaping business, healthcare, and education with our comprehensive guide.</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Post Stats -->
+                        <div class="px-4 py-2 border-t border-gray-100 text-sm text-gray-500 flex items-center">
+                            <div class="flex items-center mr-4">
+                                <div class="flex -space-x-1">
+                                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/30a6e878-d87b-4e35-8b52-218b8885bd9c.png" alt="Small profile picture of user Daniel Park" class="w-5 h-5 rounded-full border-2 border-white" />
+                                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/05d476e0-4534-4bba-a00f-d823bd1ffe0e.png" alt="Small profile picture of user Lisa Wong" class="w-5 h-5 rounded-full border-2 border-white" />
+                                </div>
+                                <span class="ml-2">78</span>
+                            </div>
+                            <div class="mr-4">
+                                <span>24 comments</span>
+                            </div>
+                            <div>
+                                <span>15 shares</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Post Actions -->
+                        <div class="px-4 py-2 border-t border-gray-100 text-sm text-gray-500 flex justify-between">
+                            <button class="flex-1 flex items-center justify-center py-2 rounded hover:bg-gray-100" onclick="likePost(this)">
+                                <i class="far fa-thumbs-up mr-2"></i>
+                                <span>Like</span>
+                            </button>
+                            <button class="flex-1 flex items-center justify-center py-2 rounded hover:bg-gray-100" onclick="focusCommentBox(this)">
+                                <i class="far fa-comment mr-2"></i>
+                                <span>Comment</span>
+                            </button>
+                            <button class="flex-1 flex items-center justify-center py-2 rounded hover:bg-gray-100">
+                                <i class="fas fa-share mr-2"></i>
+                                <span>Share</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Comments -->
+                        <div class="px-4 py-2 border-t border-gray-100">
+                            <div class="flex mb-2">
+                                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/9f007429-bc03-4f7e-8b7a-00dafe06c1d1.png" alt="Profile picture of commenter Alex Turner" class="w-8 h-8 rounded-full mr-2" />
+                                <div>
+                                    <div class="bg-gray-100 rounded-lg p-2">
+                                        <p class="font-semibold text-sm">Alex Turner</p>
+                                        <p class="text-sm">Fascinating stuff! The healthcare applications alone could save millions of lives.</p>
+                                    </div>
+                                    <div class="flex text-xs text-gray-500 mt-1">
+                                        <button class="mr-2 hover:text-gray-700">Like</button>
+                                        <button class="hover:text-gray-700">Reply</button>
+                                        <span class="ml-2">3h</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex mb-2">
+                                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/5f9f4639-88be-4cb3-913d-caaccbca416c.png" alt="Profile picture of commenter Priya Patel" class="w-8 h-8 rounded-full mr-2" />
+                                <div>
+                                    <div class="bg-gray-100 rounded-lg p-2">
+                                        <p class="font-semibold text-sm">Priya Patel</p>
+                                        <p class="text-sm">What safeguards are being implemented for ethical AI?</p>
+                                    </div>
+                                    <div class="flex text-xs text-gray-500 mt-1">
+                                        <button class="mr-2 hover:text-gray-700">Like</button>
+                                        <button class="hover:text-gray-700">Reply</button>
+                                        <span class="ml-2">2h</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/4c98c7ba-6ca6-4574-86b4-c7e1b0b4db75.png" alt="Current user's small profile picture" class="w-8 h-8 rounded-full mr-2" />
+                                <input type="text" placeholder="Write a comment..." class="flex-1 bg-gray-100 rounded-full py-2 px-4 text-sm focus:outline-none comment-input" onkeypress="handleCommentKeyPress(event, this)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Right Sidebar (hidden on mobile) -->
+            <aside class="hidden lg:block lg:w-80 bg-white border-l border-gray-200 p-4 overflow-y-auto">
+                <div class="mb-6">
+                    <h2 class="font-semibold text-lg mb-4">Stories</h2>
+                    <div class="space-y-3">
+                        <div class="flex items-center cursor-pointer p-1 rounded-lg hover:bg-gray-100" onclick="openStoryViewer(6)">
+                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/19bf1ca5-76fd-4ab9-9e6e-a3d1c92de2f4.png" alt="Profile picture of friend Marcus Green with adventurous background" class="w-14 h-14 rounded-full border-2 border-blue-500" />
+                            <div class="ml-3">
+                                <p class="font-semibold">Marcus Green</p>
+                                <p class="text-xs text-gray-500">Posted 25m ago</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center cursor-pointer p-1 rounded-lg hover:bg-gray-100" onclick="openStoryViewer(7)">
+                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/eab54ba1-279e-4967-a611-2524b6d1f23c.png" alt="Profile picture of friend Sofia Martinez in her dance studio" class="w-14 h-14 rounded-full border-2 border-blue-500" />
+                            <div class="ml-3">
+                                <p class="font-semibold">Sofia Martinez</p>
+                                <p class="text-xs text-gray-500">Posted 1h ago</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center cursor-pointer p-1 rounded-lg hover:bg-gray-100" onclick="openStoryViewer(8)">
+                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/a2e3c4f9-6d48-4116-b777-e060e119db85.png" alt="Profile picture of friend James Wilson at tech conference" class="w-14 h-14 rounded-full border-2 border-blue-500" />
+                            <div class="ml-3">
+                                <p class="font-semibold">James Wilson</p>
+                                <p class="text-xs text-gray-500">Posted 3h ago</p>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="w-full mt-4 text-blue-600 hover:text-blue-800 text-sm font-medium">
+                        See All Stories
+                    </button>
+                </div>
+                
+                <div class="mb-6">
+                    <h2 class="font-semibold text-lg mb-4">Suggested Friends</h2>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-1 rounded-lg hover:bg-gray-100">
+                            <div class="flex items-center">
+                                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/9c4897be-7089-4762-8ddf-8eac793ccaef.png" alt="Suggested friend Anna Kim profile picture" class="w-10 h-10 rounded-full" />
+                                <div class="ml-3">
+                                    <p class="font-semibold">Anna Kim</p>
+                                    <p class="text-xs text-gray-500">12 mutual friends</p>
+                                </div>
+                            </div>
+                            <button class="text-blue-600 hover:text-blue-800 text-sm font-medium" onclick="sendFriendRequest(this)">
+                                Add Friend
+                            </button>
+                        </div>
+                        <div class="flex items-center justify-between p-1 rounded-lg hover:bg-gray-100">
+                            <div class="flex items-center">
+                                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/6bd96017-78d4-4307-b32b-e0c805211d86.png" alt="Suggested friend David Liu profile picture" class="w-10 h-10 rounded-full" />
+                                <div class="ml-3">
+                                    <p class="font-semibold">David Liu</p>
+                                    <p class="text-xs text-gray-500">8 mutual friends</p>
+                                </div>
+                            </div>
+                            <button class="text-blue-600 hover:text-blue-800 text-sm font-medium" onclick="sendFriendRequest(this)">
+                                Add Friend
+                            </button>
+                        </div>
+                        <div class="flex items-center justify-between p-1 rounded-lg hover:bg-gray-100">
+                            <div class="flex items-center">
+                                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/339e77d5-74e7-46dc-bbe2-c1a49131cd23.png" alt="Suggested friend Emma Thompson profile picture" class="w-10 h-10 rounded-full" />
+                                <div class="ml-3">
+                                    <p class="font-semibold">Emma Thompson</p>
+                                    <p class="text-xs text-gray-500">5 mutual friends</p>
+                                </div>
+                            </div>
+                            <button class="text-blue-600 hover:text-blue-800 text-sm font-medium" onclick="sendFriendRequest(this)">
+                                Add Friend
+                            </button>
+                        </div>
+                    </div>
+                    <button class="w-full mt-4 text-blue-600 hover:text-blue-800 text-sm font-medium">
+                        See All Suggestions
+                    </button>
+                </div>
+                
+                <div class="mb-6">
+                    <h2 class="font-semibold text-lg mb-4">Trending Now</h2>
+                    <div class="space-y-2">
+                        <div class="p-2 rounded-lg hover:bg-gray-100 cursor-pointer">
+                            <p class="font-semibold">#TechConference2023</p>
+                            <p class="text-xs text-gray-500">12.8K posts</p>
+                        </div>
+                        <div class="p-2 rounded-lg hover:bg-gray-100 cursor-pointer">
+                            <p class="font-semibold">#SummerTravel</p>
+                            <p class="text-xs text-gray-500">24.5K posts</p>
+                        </div>
+                        <div class="p-2 rounded-lg hover:bg-gray-100 cursor-pointer">
+                            <p class="font-semibold">#HomeDecorIdeas</p>
+                            <p class="text-xs text-gray-500">8.3K posts</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-xs text-gray-500">
+                    <div class="flex flex-wrap">
+                        <a href="#" class="mr-2 mb-1 hover:underline">Privacy</a>
+                        <a href="#" class="mr-2 mb-1 hover:underline">Terms</a>
+                        <a href="#" class="mr-2 mb-1 hover:underline">Advertising</a>
+                        <a href="#" class="mr-2 mb-1 hover:underline">Cookies</a>
+                        <a href="#" class="mr-2 mb-1 hover:underline">More</a>
+                    </div>
+                    <p class="mt-2">Socius © 2023</p>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around md:hidden">
+        <a href="#" class="flex flex-col items-center justify-center p-3 text-blue-600">
+            <i class="fas fa-home"></i>
+            <span class="text-xs mt-1">Home</span>
+        </a>
+        <a href="#" class="flex flex-col items-center justify-center p-3 text-gray-500">
+            <i class="fas fa-search"></i>
+            <span class="text-xs mt-1">Explore</span>
+        </a>
+        <a href="#" class="flex flex-col items-center justify-center p-3 text-gray-500 relative">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge">3</span>
+            <span class="text-xs mt-1">Notifications</span>
+        </a>
+        <a href="#" class="flex flex-col items-center justify-center p-3 text-gray-500">
+            <i class="fas fa-envelope"></i>
+            <span class="text-xs mt-1">Messages</span>
+        </a>
+        <a href="#" class="flex flex-col items-center justify-center p-3 text-gray-500">
+            <i class="fas fa-user"></i>
+            <span class="text-xs mt-1">Profile</span>
+        </a>
+    </div>
+
+    <!-- Create Post Modal -->
+    <div id="createPostModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-lg w-full max-w-md mx-2 animate-fade-in">
+            <div class="border-b border-gray-200 p-4 flex justify-between items-center">
+                <h3 class="font-semibold text-lg">Create Post</h3>
+                <button class="text-gray-500 hover:text-gray-700" onclick="closeCreatePostModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-4">
+                <div class="flex mb-3">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/8dc37567-265c-441a-b5cc-80521cb321ca.png" alt="User profile picture" class="w-10 h-10 rounded-full mr-3" />
+                    <div>
+                        <p class="font-semibold">You</p>
+                        <select class="text-xs bg-gray-100 rounded focus:outline-none">
+                            <option><i class="fas fa-globe-americas"></i> Public</option>
+                            <option>Friends</option>
+                            <option>Only Me</option>
+                        </select>
+                    </div>
+                </div>
+                <textarea class="w-full h-32 border-none focus:outline-none resize-none placeholder-gray-500" placeholder="What's on your mind?"></textarea>
+                <div class="bg-gray-100 bg-opacity-50 rounded-lg p-4 mb-4 flex justify-center items-center">
+                    <div id="addContentButtons" class="flex flex-col items-center">
+                        <button class="p-3 rounded-full bg-gray-200 mb-2" onclick="addPhotoVideo()">
+                            <i class="fas fa-photo-video text-blue-500"></i>
+                        </button>
+                        <p class="text-xs text-gray-600">Add Photo/Video</p>
+                    </div>
+                    <img id="postPreviewImage" src="" alt="" class="hidden w-full h-auto rounded-lg" />
+                </div>
+                <div class="flex justify-between mb-4">
+                    <button class="flex items-center px-3 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">
+                        <i class="fas fa-user-tag text-green-500 mr-2"></i>
+                        <span>Tag Friends</span>
+                    </button>
+                    <button class="flex items-center px-3 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">
+                        <i class="fas fa-smile text-yellow-500 mr-2"></i>
+                        <span>Feeling</span>
+                    </button>
+                    <button class="flex items-center px-3 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">
+                        <i class="fas fa-map-marker-alt text-red-500 mr-2"></i>
+                        <span>Location</span>
+                    </button>
+                </div>
+                <button class="w-full gradient-bg text-white py-2 rounded-lg font-medium shadow-md hover:shadow-lg transition">
+                    Post
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Story Modal -->
+    <div id="storyModal" class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden">
+        <div class="relative h-full w-full">
+            <button class="absolute top-4 right-4 text-white z-10" onclick="closeStoryModal()">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+            <div class="flex items-center justify-center h-full relative">
+                <button class="absolute left-4 text-white z-10" onclick="prevStory()">
+                    <i class="fas fa-chevron-left text-2xl"></i>
+                </button>
+                <div class="relative w-full max-w-lg">
+                    <div id="storyProgressBar" class="absolute top-4 left-4 right-4 bg-gray-300 bg-opacity-30 rounded-full h-1">
+                        <div id="storyProgress" class="bg-white h-1 rounded-full" style="width: 0%;"></div>
+                    </div>
+                    <img id="storyImage" src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/50b4cf36-11d0-4201-8b23-e81bc0eb1818.png" alt="Full screen story image from user's perspective" class="w-full h-screen max-h-[80vh] object-contain" />
+                </div>
+                <button class="absolute right-4 text-white z-10" onclick="nextStory()">
+                    <i class="fas fa-chevron-right text-2xl"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Current state
+        let currentStoryIndex = 0;
+        let likedPosts = [];
+        
+        // Post options menu toggle
+        function togglePostOptionsMenu(element) {
+            const menu = element.nextElementSibling;
+            const allMenus = document.querySelectorAll('.post-options-menu');
+            
+            // Close all other menus
+            allMenus.forEach(m => {
+                if (m !== menu && !m.classList.contains('hidden')) {
+                    m.classList.add('hidden');
+                }
+            });
+            
+            // Toggle current menu
+            menu.classList.toggle('hidden');
+        }
+        
+        // Close menus when clicking elsewhere
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.post-options-menu') && !event.target.matches('button')) {
+                document.querySelectorAll('.post-options-menu').forEach(menu => {
+                    menu.classList.add('hidden');
+                });
+            }
+        });
+        
+        // Like post functionality
+        function likePost(button) {
+            const post = button.closest('.post-card');
+            const postId = post.dataset.postId || Math.floor(Math.random() * 1000);
+            
+            if (likedPosts.includes(postId)) {
+                // Unlike
+                likedPosts = likedPosts.filter(id => id !== postId);
+                button.innerHTML = '<i class="far fa-thumbs-up mr-2"></i><span>Like</span>';
+            } else {
+                // Like
+                likedPosts.push(postId);
+                button.innerHTML = '<i class="fas fa-thumbs-up mr-2 text-blue-600"></i><span>Liked</span>';
+            }
+            
+            // Update like count display (simplified)
+            const likeCountElement = post.querySelector('div[onclick="likePost(this)"]').previousElementSibling.querySelector('span:nth-child(2)');
+            if (likeCountElement) {
+                const currentCount = parseInt(likeCountElement.textContent) || 0;
+                likeCountElement.textContent = likedPosts.includes(postId) ? currentCount + 1 : currentCount - 1;
+            }
+        }
+        
+        // Focus comment box
+        function focusCommentBox(button) {
+            const commentInput = button.closest('.post-card').querySelector('.comment-input');
+            if (commentInput) {
+                commentInput.focus();
+            }
+        }
+        
+        // Handle comment submission
+        function handleCommentKeyPress(event, input) {
+            if (event.key === 'Enter' && input.value.trim()) {
+                const commentSection = input.closest('.border-t');
+                if (commentSection) {
+                    // Create new comment
+                    const newComment = document.createElement('div');
+                    newComment.className = 'flex mb-2';
+                    newComment.innerHTML = `
+                        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/4230b3fc-b2d0-420e-818b-e7ad4c711ba0.png" alt="Your profile picture" class="w-8 h-8 rounded-full mr-2" />
+                        <div>
+                            <div class="bg-gray-100 rounded-lg p-2">
+                                <p class="font-semibold text-sm">You</p>
+                                <p class="text-sm">${input.value}</p>
+                            </div>
+                            <div class="flex text-xs text-gray-500 mt-1">
+                                <button class="mr-2 hover:text-gray-700">Like</button>
+                                <button class="hover:text-gray-700">Reply</button>
+                                <span class="ml-2">Just now</span>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Insert before the input
+                    commentSection.insertBefore(newComment, input.parentNode);
+                    
+                    // Update comment count
+                    const commentCountElement = input.closest('.post-card').querySelector('button[onclick="focusCommentBox(this)"]').nextElementSibling;
+                    if (commentCountElement) {
+                        const currentText = commentCountElement.textContent || '';
+                        const matches = currentText.match(/(\d+)/);
+                        const currentCount = matches ? parseInt(matches[0]) : 0;
+                        commentCountElement.textContent = currentText.replace(/\d+/, currentCount + 1);
+                    }
+                    
+                    // Clear input
+                    input.value = '';
+                }
+            }
+        }
+        
+        // Story modal functions
+        function openStoryModal() {
+            document.getElementById('storyModal').classList.remove('hidden');
+            startStoryProgress();
+        }
+        
+        function closeStoryModal() {
+            document.getElementById('storyModal').classList.add('hidden');
+            stopStoryProgress();
+        }
+        
+        function openStoryViewer(index) {
+            currentStoryIndex = index;
+            const storyImage = document.getElementById('storyImage');
+            storyImage.src = `https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/e4de4f26-4e16-44b2-9b27-0cd0e7096c54.png
+            storyImage.alt = `Story content from user ${index}`;
+            openStoryModal();
+        }
+        
+        function prevStory() {
+            currentStoryIndex = Math.max(0, currentStoryIndex - 1);
+            document.getElementById('storyImage').src = `https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/73422a49-670c-4fa5-8ea2-3603be980fe2.png
+            document.getElementById('storyImage').alt = `Story content from user ${currentStoryIndex}`;
+            resetStoryProgress();
+        }
+        
+        function nextStory() {
+            currentStoryIndex += 1;
+            document.getElementById('storyImage').src = `https://placehold.co/1080x1920?story=${currentStoryIndex}`;
+            document.getElementById('storyImage').alt = `Story content from user ${currentStoryIndex}`;
+            resetStoryProgress();
+        }
+        
+        let progressInterval;
+        function startStoryProgress() {
+            resetStoryProgress();
+            progressInterval = setInterval(() => {
+                const progress = document.getElementById('storyProgress');
+                const currentWidth = parseFloat(progress.style.width) || 0;
+                progress.style.width = `${currentWidth + 1}%`;
+                
+                if (currentWidth >= 100) {
+                    nextStory();
+                }
+            }, 100);
+        }
+        
+        function stopStoryProgress() {
+            clearInterval(progressInterval);
+        }
+        
+        function resetStoryProgress() {
+            stopStoryProgress();
+            document.getElementById('storyProgress').style.width = '0%';
+            startStoryProgress();
+        }
+        
+        // Create post modal functions
+        function openCreatePostModal(type = null) {
+            const modal = document.getElementById('createPostModal');
+            const addContentButtons = document.getElementById('addContentButtons');
+            const postPreviewImage = document.getElementById('postPreviewImage');
+            
+            if (type === 'photo') {
+                addContentButtons.classList.add('hidden');
+                postPreviewImage.classList.remove('hidden');
+                postPreviewImage.src = 'https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/a96d179b-c2f3-40e6-a0cf-3662feb90740.png';
+                postPreviewImage.alt = 'Preview of selected photo for post';
+            } else {
+                addContentButtons.classList.remove('hidden');
+                postPreviewImage.classList.add('hidden');
+            }
+            
+            modal.classList.remove('hidden');
+        }
+        
+        function closeCreatePostModal() {
+            document.getElementById('createPostModal').classList.add('hidden');
+        }
+        
+        function addPhotoVideo() {
+            // Simulate file selection
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'image/*,video/*';
+            fileInput.onchange = (e) => {
+                if (e.target.files.length > 0) {
+                    const addContentButtons = document.getElementById('addContentButtons');
+                    const postPreviewImage = document.getElementById('postPreviewImage');
+                    
+                    addContentButtons.classList.add('hidden');
+                    postPreviewImage.classList.remove('hidden');
+                    postPreviewImage.src = URL.createObjectURL(e.target.files[0]);
+                    postPreviewImage.alt = 'Selected media preview';
+                }
+            };
+            fileInput.click();
+        }
+        
+        // Send friend request
+        function sendFriendRequest(button) {
+            button.textContent = 'Request Sent';
+            button.disabled = true;
+            button.classList.remove('hover:text-blue-800');
+            button.classList.add('text-gray-500');
+        }
+        
+        // Initialize any tab functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up tab switching for future expansion
+            const tabs = document.querySelectorAll('[data-tab-target]');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const target = document.querySelector(tab.dataset.tabTarget);
+                    document.querySelectorAll('[data-tab-content]').forEach(content => {
+                        content.classList.add('hidden');
+                    });
+                    target.classList.remove('hidden');
+                    
+                    document.querySelectorAll('[data-tab-target]').forEach(t => {
+                        t.classList.remove('tab-active');
+                    });
+                    tab.classList.add('tab-active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+
